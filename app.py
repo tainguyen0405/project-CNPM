@@ -138,12 +138,12 @@ if __name__ == '__main__':
         if not User.query.filter_by(username='admin').first():
             db.session.add(User(
                 username = 'admin',
-                password = generate_password_hash('admin123',method='pbkdf2:sha256'),
+                password = generate_password_hash('admin123'),
                 role     = 'admin'
             ))
             db.session.add(User(
                 username = 'reader1',
-                password = generate_password_hash('reader123',method='pbkdf2:sha256'),
+                password = generate_password_hash('reader123'),
                 role     = 'reader'
             ))
             db.session.commit()
