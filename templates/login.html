@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đăng nhập</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body class="bg-[#F5F7FA] min-h-screen flex items-center justify-center">
+  <div id="card" class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md">
+    <h1 class="text-3xl font-bold text-[#1E3A5F] mb-2">📚 LibraryMS</h1>
+    <p class="text-gray-400 mb-8 text-sm">Hệ thống Quản lý Thư viện</p>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="bg-red-100 text-red-600 px-4 py-2 rounded-xl mb-4 text-sm">⚠️ {{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="mb-4">
+        <label class="text-sm text-gray-500 mb-1 block">Tên đăng nhập</label>
+        <input name="username" type="text" required
+          class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] transition-all"
+          placeholder="admin">
+      </div>
+      <div class="mb-6">
+        <label class="text-sm text-gray-500 mb-1 block">Mật khẩu</label>
+        <input name="password" type="password" required
+          class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] transition-all"
+          placeholder="••••••••">
+      </div>
+      <button type="submit"
+        class="w-full bg-[#1E3A5F] text-white py-3 rounded-xl font-semibold hover:bg-[#162f4f] transition-all duration-200">
+        Đăng nhập →
+      </button>
+    </form>
+  </div>
+  <script>
+    gsap.from("#card", { y: 40, opacity: 0, duration: 0.6, ease: "power3.out" });
+  </script>
+</body>
+</html> 
