@@ -1,44 +1,145 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Library MS</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LibraryMS</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+
+body{
+background:#f4f7fb;
+overflow-x:hidden;
+}
+
+.glass{
+background:rgba(255,255,255,.8);
+backdrop-filter:blur(12px);
+}
+
+</style>
+
 </head>
-<body class="bg-[#F5F7FA] flex min-h-screen font-sans">
 
-  <!-- SIDEBAR -->
-  <aside id="sidebar" class="w-60 bg-[#1E3A5F] text-white flex flex-col p-6 gap-2 shadow-2xl">
-    <h1 class="text-lg font-bold mb-8 tracking-wide">📚 LibraryMS</h1>
-    <a href="/dashboard" class="px-4 py-2 rounded-xl hover:bg-white/10 transition-all duration-200">🏠 Dashboard</a>
-    <a href="/books"     class="px-4 py-2 rounded-xl hover:bg-white/10 transition-all duration-200">📖 Quản lý Sách</a>
-    <a href="/borrow"    class="px-4 py-2 rounded-xl hover:bg-white/10 transition-all duration-200">🔄 Mượn / Trả</a>
-    <div class="mt-auto border-t border-white/20 pt-4">
-      <p class="text-xs text-white/50 mb-2">{{ current_user.username }} ({{ current_user.role }})</p>
-      <a href="/logout" class="px-4 py-2 rounded-xl hover:bg-red-500/30 transition-all duration-200 block">🚪 Đăng xuất</a>
-    </div>
-  </aside>
+<body class="flex min-h-screen">
 
-  <!-- MAIN -->
-  <main class="flex-1 p-8" id="main-content">
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div id="flash" class="bg-green-100 text-green-800 px-5 py-3 rounded-2xl mb-6 shadow-sm">
-          ✅ {{ messages[0] }}
-        </div>
-      {% endif %}
-    {% endwith %}
-    {% block content %}{% endblock %}
-  </main>
+<!-- SIDEBAR -->
 
-  <script>
-    // Animation 
-    gsap.from("#sidebar",      { x: -40, opacity: 0, duration: 0.5, ease: "power3.out" });
-    gsap.from("#main-content", { x:  30, opacity: 0, duration: 0.5, ease: "power3.out", delay: 0.1 });
-    // Flash 
-    const flash = document.getElementById('flash');
-    if (flash) setTimeout(() => gsap.to(flash, { opacity: 0, y: -10, duration: 0.4 }), 3000);
-  </script>
+<aside
+id="sidebar"
+class="w-64 bg-[#1E3A5F] text-white flex flex-col p-6 shadow-2xl">
+
+<h1 class="text-2xl font-bold mb-10">
+📚 LibraryMS
+</h1>
+
+<nav class="flex flex-col gap-3">
+
+<a href="/dashboard"
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+🏠 Dashboard
+</a>
+
+<a href="/books"
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+📖 Books
+</a>
+
+<a href="/borrow"
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+🔄 Borrow & Return
+</a>
+
+<a href="/categories"
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+📂 Categories
+</a>
+
+<a href="/notifications"
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+🔔 Notifications
+</a>
+
+</nav>
+
+<div class="mt-auto">
+
+<hr class="my-5 border-white/20">
+
+<p class="text-sm text-white/70">
+
+{{ current_user.username }}
+
+</p>
+
+<p class="text-xs text-white/50">
+
+{{ current_user.role }}
+
+</p>
+
+<a
+href="/logout"
+class="block mt-4 bg-red-500 text-center py-2 rounded-xl">
+
+Logout
+
+</a>
+
+</div>
+
+</aside>
+
+<!-- MAIN -->
+
+<main
+id="main-content"
+class="flex-1 p-8">
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+
+<div
+id="flash"
+class="bg-green-100 text-green-800 px-5 py-3 rounded-xl mb-5">
+
+{{ messages[0] }}
+
+</div>
+
+{% endif %}
+{% endwith %}
+
+{% block content %}
+{% endblock %}
+
+</main>
+
+<script>
+
+gsap.from(
+"#sidebar",
+{
+x:-120,
+opacity:0,
+duration:1
+}
+)
+
+gsap.from(
+"#main-content",
+{
+y:30,
+opacity:0,
+duration:1
+}
+)
+
+</script>
+
 </body>
 </html>

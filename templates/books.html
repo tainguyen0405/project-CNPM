@@ -1,87 +1,260 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="flex items-center justify-between mb-6">
-  <h2 class="text-2xl font-bold text-[#1E3A5F]">📖 Quản lý Sách</h2>
-  <button onclick="document.getElementById('modal').classList.remove('hidden')"
-    class="bg-[#1E3A5F] text-white px-5 py-2 rounded-xl hover:bg-[#162f4f] transition-all">
-    + Thêm sách
-  </button>
+
+<div class="flex justify-between items-center mb-8">
+
+    <h2 class="text-3xl font-bold text-[#1E3A5F]">
+        📖 Book Management
+    </h2>
+
+    <button
+        onclick="openModal()"
+        class="bg-[#1E3A5F] text-white px-5 py-3 rounded-xl hover:scale-105 transition">
+
+        + Add Book
+
+    </button>
+
 </div>
 
-<!-- Tìm kiếm -->
-<form method="GET" class="mb-6">
-  <input name="q" value="{{ query }}" placeholder="Tìm theo tên, tác giả..."
-    class="border border-gray-200 rounded-xl px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
-  <button class="ml-2 bg-gray-100 px-4 py-2 rounded-xl hover:bg-gray-200 transition-all">🔍</button>
+<!-- Search -->
+
+<form method="GET" class="mb-6 flex gap-3">
+
+    <input
+        type="text"
+        name="q"
+        value="{{ query }}"
+        placeholder="Search title..."
+        class="border rounded-xl px-4 py-3 w-96">
+
+    <button
+        class="bg-gray-100 px-5 rounded-xl">
+
+        🔍 Search
+
+    </button>
+
 </form>
 
-<!-- Bảng sách -->
-<div class="bg-white rounded-2xl shadow-sm overflow-hidden" id="book-table">
-  <table class="w-full text-sm">
-    <thead class="bg-[#1E3A5F] text-white">
-      <tr>
-        <th class="px-6 py-4 text-left">Tên sách</th>
-        <th class="px-6 py-4 text-left">Tác giả</th>
-        <th class="px-6 py-4 text-left">Thể loại</th>
-        <th class="px-6 py-4 text-center">Số lượng</th>
-        <th class="px-6 py-4 text-center">Thao tác</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for book in books %}
-      <tr class="border-t border-gray-100 hover:bg-gray-50 transition-all">
-        <td class="px-6 py-4 font-medium">{{ book.title }}</td>
-        <td class="px-6 py-4 text-gray-500">{{ book.author }}</td>
-        <td class="px-6 py-4">
-          <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs">{{ book.category }}</span>
-        </td>
-        <td class="px-6 py-4 text-center">
-          <span class="font-bold {% if book.quantity == 0 %}text-red-500{% else %}text-green-600{% endif %}">
-            {{ book.quantity }}
-          </span>
-        </td>
-        <td class="px-6 py-4 text-center">
-          <a href="/books/delete/{{ book.id }}"
-            onclick="return confirm('Xóa sách này?')"
-            class="text-red-500 hover:text-red-700 transition-all">🗑 Xóa</a>
-        </td>
-      </tr>
-      {% else %}
-      <tr><td colspan="5" class="text-center py-10 text-gray-400">Không có sách nào</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<!-- TABLE -->
+
+<div
+    id="book-table"
+    class="glass rounded-3xl overflow-hidden shadow-lg">
+
+    <table class="w-full">
+
+        <thead class="bg-[#1E3A5F] text-white">
+
+            <tr>
+
+                <th class="p-4 text-left">Title</th>
+                <th class="p-4 text-left">Author</th>
+                <th class="p-4 text-left">Category</th>
+                <th class="p-4 text-center">Quantity</th>
+                <th class="p-4 text-center">Action</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for book in books %}
+
+            <tr class="border-b hover:bg-gray-50">
+
+                <td class="p-4 font-semibold">
+
+                    {{ book.title }}
+
+                </td>
+
+                <td class="p-4">
+
+                    {{ book.author }}
+
+                </td>
+
+                <td class="p-4">
+
+                    {% if book.category %}
+
+                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs">
+
+                        {{ book.category.name }}
+
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td class="p-4 text-center">
+
+                    {% if book.quantity > 0 %}
+
+                    <span class="text-green-600 font-bold">
+
+                        {{ book.quantity }}
+
+                    </span>
+
+                    {% else %}
+
+                    <span class="text-red-500 font-bold">
+
+                        Out
+
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td class="p-4 text-center">
+
+                    <a
+                        href="/books/delete/{{ book.id }}"
+                        onclick="return confirm('Delete this book?')"
+                        class="text-red-500 hover:text-red-700">
+
+                        🗑 Delete
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
 </div>
 
-<!-- Model thêm sách -->
-<div id="modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-  <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
-    <h3 class="text-xl font-bold text-[#1E3A5F] mb-6">Thêm sách mới</h3>
-    <form method="POST" action="/books/add">
-      <input name="title" placeholder="Tên sách" required
-        class="w-full border rounded-xl px-4 py-3 mb-3 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
-      <input name="author" placeholder="Tác giả"
-        class="w-full border rounded-xl px-4 py-3 mb-3 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
-      <input name="category" placeholder="Thể loại"
-        class="w-full border rounded-xl px-4 py-3 mb-3 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
-      <input name="quantity" type="number" placeholder="Số lượng" value="1" min="1"
-        class="w-full border rounded-xl px-4 py-3 mb-6 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
-      <div class="flex gap-3">
-        <button type="submit"
-          class="flex-1 bg-[#1E3A5F] text-white py-3 rounded-xl hover:bg-[#162f4f] transition-all">
-          Thêm
-        </button>
-        <button type="button"
-          onclick="document.getElementById('modal').classList.add('hidden')"
-          class="flex-1 bg-gray-100 py-3 rounded-xl hover:bg-gray-200 transition-all">
-          Hủy
-        </button>
-      </div>
-    </form>
-  </div>
+<!-- MODAL -->
+
+<div
+    id="modal"
+    class="hidden fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+
+    <div
+        id="modal-box"
+        class="bg-white p-8 rounded-3xl w-[500px]">
+
+        <h3 class="text-2xl font-bold mb-6">
+
+            Add New Book
+
+        </h3>
+
+        <form method="POST" action="/books/add">
+
+            <input
+                name="title"
+                required
+                placeholder="Book Title"
+                class="w-full border rounded-xl px-4 py-3 mb-4">
+
+            <input
+                name="author"
+                required
+                placeholder="Author"
+                class="w-full border rounded-xl px-4 py-3 mb-4">
+
+            <select
+                name="category_id"
+                required
+                class="w-full border rounded-xl px-4 py-3 mb-4">
+
+                {% for c in categories %}
+
+                <option value="{{ c.id }}">
+
+                    {{ c.name }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <input
+                type="number"
+                name="quantity"
+                value="1"
+                min="1"
+                class="w-full border rounded-xl px-4 py-3 mb-5">
+
+            <div class="flex gap-3">
+
+                <button
+                    class="flex-1 bg-[#1E3A5F] text-white py-3 rounded-xl">
+
+                    Add
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="closeModal()"
+                    class="flex-1 bg-gray-200 py-3 rounded-xl">
+
+                    Cancel
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
 </div>
 
 <script>
-  gsap.from("#book-table", { y: 20, opacity: 0, duration: 0.4, ease: "power2.out", delay: 0.2 });
+
+gsap.from(
+"#book-table",
+{
+y:30,
+opacity:0,
+duration:1
+}
+)
+
+function openModal(){
+
+document
+.getElementById("modal")
+.classList
+.remove("hidden")
+
+gsap.from(
+"#modal-box",
+{
+scale:.8,
+opacity:0,
+duration:.4
+}
+)
+
+}
+
+function closeModal(){
+
+document
+.getElementById("modal")
+.classList
+.add("hidden")
+
+}
+
 </script>
+
 {% endblock %}

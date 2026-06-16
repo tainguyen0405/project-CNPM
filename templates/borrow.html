@@ -1,65 +1,185 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<h2 class="text-2xl font-bold text-[#1E3A5F] mb-6">🔄 Mượn / Trả Sách</h2>
 
-<!-- Form cho mượn -->
-<div class="bg-white rounded-2xl p-6 shadow-sm mb-8">
-  <h3 class="font-semibold text-gray-700 mb-4">Cho mượn sách</h3>
-  <form method="POST" action="/borrow/add" class="flex gap-3 flex-wrap">
-    <select name="user_id" required
-      class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
-      <option value="">-- Chọn độc giả --</option>
-      {% for u in users %}
-        <option value="{{ u.id }}">{{ u.username }}</option>
-      {% endfor %}
-    </select>
-    <select name="book_id" required
-      class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
-      <option value="">-- Chọn sách --</option>
-      {% for b in books %}
-        <option value="{{ b.id }}">{{ b.title }} (còn {{ b.quantity }})</option>
-      {% endfor %}
-    </select>
-    <button class="bg-[#1E3A5F] text-white px-6 py-2 rounded-xl hover:bg-[#162f4f] transition-all">
-      Cho mượn
-    </button>
-  </form>
+<h2 class="text-3xl font-bold text-[#1E3A5F] mb-8">
+
+🔄 Borrow & Return
+
+</h2>
+
+<!-- Borrow Form -->
+
+<div class="glass p-6 rounded-3xl mb-8">
+
+    <h3 class="font-semibold mb-4">
+
+        Borrow Book
+
+    </h3>
+
+    <form
+        method="POST"
+        action="/borrow/add"
+        class="flex flex-wrap gap-4">
+
+        <select
+            name="user_id"
+            required
+            class="border rounded-xl px-4 py-3">
+
+            <option value="">
+                Select Reader
+            </option>
+
+            {% for u in users %}
+
+            <option value="{{ u.id }}">
+
+                {{ u.username }}
+
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+        <select
+            name="book_id"
+            required
+            class="border rounded-xl px-4 py-3">
+
+            <option value="">
+                Select Book
+            </option>
+
+            {% for b in books %}
+
+            <option value="{{ b.id }}">
+
+                {{ b.title }}
+                ({{ b.quantity }})
+
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+        <button
+            class="bg-[#1E3A5F] text-white px-6 rounded-xl">
+
+            Borrow
+
+        </button>
+
+    </form>
+
 </div>
 
-<!-- Danh sách đang mượn -->
-<div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-  <table class="w-full text-sm">
-    <thead class="bg-[#1E3A5F] text-white">
-      <tr>
-        <th class="px-6 py-4 text-left">Độc giả</th>
-        <th class="px-6 py-4 text-left">Sách</th>
-        <th class="px-6 py-4 text-left">Ngày mượn</th>
-        <th class="px-6 py-4 text-left">Hạn trả</th>
-        <th class="px-6 py-4 text-center">Thao tác</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in records %}
-      <tr class="border-t border-gray-100 hover:bg-gray-50 transition-all
-        {% if r.due_date < today %}bg-red-50{% endif %}">
-        <td class="px-6 py-4">{{ r.user.username }}</td>
-        <td class="px-6 py-4 font-medium">{{ r.book.title }}</td>
-        <td class="px-6 py-4 text-gray-500">{{ r.borrow_date }}</td>
-        <td class="px-6 py-4 {% if r.due_date < today %}text-red-600 font-bold{% endif %}">
-          {{ r.due_date }}
-          {% if r.due_date < today %} ⚠️{% endif %}
-        </td>
-        <td class="px-6 py-4 text-center">
-          <a href="/borrow/return/{{ r.id }}"
-            class="bg-green-100 text-green-700 px-4 py-1 rounded-xl hover:bg-green-200 transition-all text-xs">
-            ✅ Trả sách
-          </a>
-        </td>
-      </tr>
-      {% else %}
-      <tr><td colspan="5" class="text-center py-10 text-gray-400">Không có sách nào đang được mượn</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<!-- TABLE -->
+
+<div
+    id="borrow-table"
+    class="glass rounded-3xl overflow-hidden shadow-lg">
+
+    <table class="w-full">
+
+        <thead class="bg-[#1E3A5F] text-white">
+
+            <tr>
+
+                <th class="p-4">Reader</th>
+                <th class="p-4">Book</th>
+                <th class="p-4">Borrow Date</th>
+                <th class="p-4">Due Date</th>
+                <th class="p-4">Action</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for r in records %}
+
+            <tr
+                class="
+                border-b
+                hover:bg-gray-50
+
+                {% if r.due_date < today %}
+                bg-red-50
+                {% endif %}
+                ">
+
+                <td class="p-4">
+
+                    {{ r.user.username }}
+
+                </td>
+
+                <td class="p-4 font-semibold">
+
+                    {{ r.book.title }}
+
+                </td>
+
+                <td class="p-4">
+
+                    {{ r.borrow_date }}
+
+                </td>
+
+                <td class="p-4">
+
+                    {{ r.due_date }}
+
+                    {% if r.due_date < today %}
+
+                    <span class="text-red-500 font-bold">
+
+                        ⚠ Overdue
+
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td class="p-4">
+
+                    <a
+                        href="/borrow/return/{{ r.id }}"
+                        class="bg-green-100 text-green-700 px-4 py-2 rounded-xl">
+
+                        Return
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
 </div>
+
+<script>
+
+gsap.from(
+"#borrow-table",
+{
+y:40,
+opacity:0,
+duration:1
+}
+)
+
+</script>
+
 {% endblock %}
