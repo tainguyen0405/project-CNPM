@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold text-[#1E3A5F] mb-8">
+📖 Book Details
+</h2>
+
+<div
+id="book-card"
+class="glass bg-white rounded-3xl p-8 shadow-lg max-w-3xl">
+
+<div class="grid grid-cols-2 gap-6">
+
+<div>
+<p class="text-gray-500">Title</p>
+<p class="font-semibold text-lg">
+{{ book.title }}
+</p>
+</div>
+
+<div>
+<p class="text-gray-500">Author</p>
+<p class="font-semibold text-lg">
+{{ book.author }}
+</p>
+</div>
+
+<div>
+<p class="text-gray-500">ISBN</p>
+<p class="font-semibold text-lg">
+{{ book.isbn or 'N/A' }}
+</p>
+</div>
+
+<div>
+<p class="text-gray-500">Publisher</p>
+<p class="font-semibold text-lg">
+{{ book.publisher or 'N/A' }}
+</p>
+</div>
+
+<div>
+<p class="text-gray-500">Publish Year</p>
+<p class="font-semibold text-lg">
+{{ book.publish_year or 'N/A' }}
+</p>
+</div>
+
+<div>
+<p class="text-gray-500">Category</p>
+<p class="font-semibold text-lg">
+{{ book.category.name if book.category else 'N/A' }}
+</p>
+</div>
+
+<div>
+<p class="text-gray-500">Quantity</p>
+<p class="font-semibold text-lg">
+{{ book.quantity }}
+</p>
+</div>
+
+<div>
+<p class="text-gray-500">Available Copies</p>
+<p class="font-semibold text-lg">
+{{ book.available_copies }}
+</p>
+</div>
+
+</div>
+
+<a
+href="/books"
+class="
+inline-block
+mt-8
+bg-[#1E3A5F]
+text-white
+px-6
+py-3
+rounded-xl">
+
+← Back
+
+</a>
+
+</div>
+
+<script>
+
+gsap.from(
+"#book-card",
+{
+y:40,
+opacity:0,
+duration:1
+}
+)
+
+</script>
+
+{% endblock %}

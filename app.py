@@ -1,4 +1,12 @@
-from flask import Flask, render_template, redirect, url_for, request, flash
+from flask import (
+    Flask,
+    render_template,
+    redirect,
+    url_for,
+    request,
+    flash
+)
+
 from flask_login import (
     LoginManager,
     login_user,
@@ -12,61 +20,130 @@ from werkzeug.security import (
     check_password_hash
 )
 
-from datetime import date, timedelta
+from datetime import (
+    date,
+    timedelta,
+    datetime
+)
 
 from models import (
     db,
     User,
+    LibrarianStaff,
     Category,
     Book,
     BorrowRecord,
     Notification
 )
 
-# ==========================================
+
+# ==================================================
 # APP CONFIG
-# ==========================================
+# ==================================================
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///library.db'
-app.config['SECRET_KEY'] = 'supersecretkey'
+app.config["SECRET_KEY"] = "library_secret_key"
+
+app.config[
+    "SQLALCHEMY_DATABASE_URI"
+] = "sqlite:///library.db"
 
 db.init_app(app)
 
-# ==========================================
-# LOGIN MANAGER
-# ==========================================
+@app.route("/dashboard")
+@login_required
+def dashboard():
 
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+    total_books = Book.query.count()
+    total_users = User.query.count()
+    total_categories = Category.query.count()
+
+    total_borrow = BorrowRecord.query.filter_by(
+        status="Borrowing"
+    ).count()
+
+    overdue = BorrowRecord.query.filter(
+        BorrowRecord.status == "Borrowing",
+        BorrowRecord.due_date < date.today()
+    ).count()
+
+    total_notifications = Notification.query.count()
+
+    return render_template(
+        "dashboard.html",
+        total_books=total_books,
+        total_users=total_users,
+        total_categories=total_categories,
+        total_borrow=total_borrow,
+        overdue=overdue,
+        total_notifications=total_notifications
+    )
+
+@app.route("/users")
+@login_required
+def users():
+
+    if current_user.role != "admin":
+        flash("Access denied")
+        return redirect(
+            url_for("dashboard")
+        )
+
+    data = User.query.all()
+
+    return render_template(
+        "users.html",
+        users=data
+    )
+
+# ==================================================
+# LOGIN MANAGER
+# ==================================================
+
+login_manager = LoginManager()
+
+login_manager.init_app(app)
+
+login_manager.login_view = "login"
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, int(user_id))
+
+    return db.session.get(
+        User,
+        int(user_id)
+    )
 
 
-# ==========================================
+# ==================================================
 # HOME
-# ==========================================
+# ==================================================
 
-@app.route('/')
+@app.route("/")
 def index():
-    return redirect(url_for('login'))
+
+    return redirect(
+        url_for("login")
+    )
 
 
-# ==========================================
+# ==================================================
 # LOGIN
-# ==========================================
+# ==================================================
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route(
+    "/login",
+    methods=["GET", "POST"]
+)
 def login():
 
-    if request.method == 'POST':
+    if request.method == "POST":
 
-        username = request.form['username']
-        password = request.form['password']
+        username = request.form["username"]
+
+        password = request.form["password"]
 
         user = User.query.filter_by(
             username=username
@@ -76,201 +153,499 @@ def login():
             user.password,
             password
         ):
+
             login_user(user)
 
-            return redirect(
-                url_for('dashboard')
+            flash(
+                f"Welcome {user.full_name}"
             )
 
-        flash('Sai tên đăng nhập hoặc mật khẩu')
+            return redirect(
+                url_for("dashboard")
+            )
 
-    return render_template('login.html')
+        flash(
+            "Invalid username or password"
+        )
+
+    return render_template(
+        "login.html"
+    )
 
 
-# ==========================================
+# ==================================================
+# REGISTER
+# ==================================================
+
+@app.route(
+    "/register",
+    methods=["GET", "POST"]
+)
+def register():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+
+        exist = User.query.filter_by(
+            username=username
+        ).first()
+
+        if exist:
+
+            flash(
+                "Username already exists"
+            )
+
+            return redirect(
+                url_for("register")
+            )
+
+        user = User(
+
+            full_name=request.form[
+                "full_name"
+            ],
+
+            username=username,
+
+            email=request.form["email"],
+
+            phone=request.form.get(
+                "phone"
+            ),
+
+            address=request.form.get(
+                "address"
+            ),
+
+            password=
+            generate_password_hash(
+                request.form["password"]
+            ),
+
+            role="reader"
+        )
+
+        db.session.add(user)
+
+        db.session.commit()
+
+        flash(
+            "Register successfully"
+        )
+
+        return redirect(
+            url_for("login")
+        )
+
+    return render_template(
+        "register.html"
+    )
+
+
+# ==================================================
 # LOGOUT
-# ==========================================
+# ==================================================
 
-@app.route('/logout')
+@app.route("/logout")
 @login_required
 def logout():
 
     logout_user()
 
     return redirect(
-        url_for('login')
+        url_for("login")
     )
 
 
-# ==========================================
-# DASHBOARD
-# ==========================================
+# ==================================================
+# PROFILE
+# ==================================================
 
-@app.route('/dashboard')
+@app.route(
+    "/profile",
+    methods=["GET", "POST"]
+)
 @login_required
-def dashboard():
+def profile():
 
-    total_books = Book.query.count()
+    if request.method == "POST":
 
-    total_users = User.query.count()
+        current_user.full_name = request.form[
+            "full_name"
+        ]
 
-    total_categories = Category.query.count()
+        current_user.email = request.form[
+            "email"
+        ]
 
-    total_borrow = BorrowRecord.query.filter_by(
-        return_date=None
-    ).count()
+        current_user.phone = request.form[
+            "phone"
+        ]
 
-    overdue = BorrowRecord.query.filter(
-        BorrowRecord.return_date == None,
-        BorrowRecord.due_date < date.today()
-    ).count()
+        current_user.address = request.form[
+            "address"
+        ]
 
-    total_notifications = Notification.query.count()
+        db.session.commit()
+
+        flash(
+            "Profile updated"
+        )
 
     return render_template(
-        'dashboard.html',
-        total_books=total_books,
-        total_users=total_users,
-        total_categories=total_categories,
-        total_borrow=total_borrow,
-        overdue=overdue,
-        total_notifications=total_notifications
+        "profile.html",
+        user=current_user
     )
 
 
-# ==========================================
-# CATEGORY MANAGEMENT
-# ==========================================
+# ==================================================
+# CHANGE PASSWORD
+# ==================================================
 
-@app.route('/categories')
+@app.route(
+    "/change-password",
+    methods=["GET", "POST"]
+)
+@login_required
+def change_password():
+
+    if request.method == "POST":
+
+        old_password = request.form[
+            "old_password"
+        ]
+
+        new_password = request.form[
+            "new_password"
+        ]
+
+        if not check_password_hash(
+            current_user.password,
+            old_password
+        ):
+
+            flash(
+                "Old password incorrect"
+            )
+
+            return redirect(
+                url_for(
+                    "change_password"
+                )
+            )
+
+        current_user.password = (
+            generate_password_hash(
+                new_password
+            )
+        )
+
+        db.session.commit()
+
+        flash(
+            "Password changed"
+        )
+
+        return redirect(
+            url_for("profile")
+        )
+
+    return render_template(
+        "change_password.html"
+    )
+    # ==================================================
+# CATEGORY MANAGEMENT
+# ==================================================
+
+@app.route("/categories")
 @login_required
 def categories():
 
     data = Category.query.all()
 
     return render_template(
-        'categories.html',
+        "categories.html",
         categories=data
     )
 
 
-@app.route('/categories/add', methods=['POST'])
+@app.route(
+    "/categories/add",
+    methods=["POST"]
+)
 @login_required
 def add_category():
 
     category = Category(
-        name=request.form['name']
+        name=request.form["name"],
+        description=request.form.get(
+            "description"
+        )
     )
 
     db.session.add(category)
+    db.session.commit()
+
+    flash("Category added")
+
+    return redirect(
+        url_for("categories")
+    )
+
+
+@app.route(
+    "/categories/update/<int:id>",
+    methods=["POST"]
+)
+@login_required
+def update_category(id):
+
+    category = Category.query.get_or_404(id)
+
+    category.name = request.form["name"]
+    category.description = request.form.get(
+        "description"
+    )
 
     db.session.commit()
 
-    flash('Thêm thể loại thành công')
+    flash("Category updated")
 
     return redirect(
-        url_for('categories')
+        url_for("categories")
     )
 
 
-# ==========================================
-# BOOK MANAGEMENT
-# ==========================================
+@app.route(
+    "/categories/delete/<int:id>"
+)
+@login_required
+def delete_category(id):
 
-@app.route('/books')
+    category = Category.query.get_or_404(id)
+
+    db.session.delete(category)
+    db.session.commit()
+
+    flash("Category deleted")
+
+    return redirect(
+        url_for("categories")
+    )
+
+
+# ==================================================
+# BOOK MANAGEMENT
+# ==================================================
+
+@app.route("/books")
 @login_required
 def books():
 
-    query = request.args.get(
-        'q',
-        ''
+    keyword = request.args.get(
+        "q",
+        ""
     )
 
-    if query:
+    if keyword:
 
-        all_books = Book.query.filter(
-            Book.title.contains(query)
+        data = Book.query.filter(
+            Book.title.contains(keyword)
         ).all()
 
     else:
 
-        all_books = Book.query.all()
+        data = Book.query.all()
 
     categories = Category.query.all()
 
     return render_template(
-        'books.html',
-        books=all_books,
+        "books.html",
+        books=data,
         categories=categories,
-        query=query
+        query=keyword
     )
 
+# ==================================================
+# ADD BOOK
+# ==================================================
 
-@app.route('/books/add', methods=['POST'])
+@app.route(
+    "/books/add",
+    methods=["POST"]
+)
 @login_required
 def add_book():
 
+    quantity = int(
+        request.form["quantity"]
+    )
+
     book = Book(
-        title=request.form['title'],
-        author=request.form['author'],
-        quantity=int(
-            request.form['quantity']
+
+        isbn=request.form.get("isbn"),
+
+        title=request.form["title"],
+
+        author=request.form.get(
+            "author"
         ),
+
+        publisher=request.form.get(
+            "publisher"
+        ),
+
+        publish_year=request.form.get(
+            "publish_year"
+        ),
+
+        quantity=quantity,
+
+        available_copies=quantity,
+
         category_id=int(
-            request.form['category_id']
+            request.form["category_id"]
         )
     )
 
     db.session.add(book)
-
     db.session.commit()
 
-    flash('Thêm sách thành công')
+    flash("Book added")
 
     return redirect(
-        url_for('books')
+        url_for("books")
     )
 
+# ==================================================
+# BOOK DETAIL
+# ==================================================
 
-@app.route('/books/delete/<int:id>')
+@app.route("/books/<int:id>")
+@login_required
+def book_detail(id):
+
+    book = Book.query.get_or_404(id)
+
+    return render_template(
+        "book_detail.html",
+        book=book
+    )
+
+# ==================================================
+# UPDATE BOOK
+# ==================================================
+
+@app.route(
+    "/books/update/<int:id>",
+    methods=["GET", "POST"]
+)
+@login_required
+def update_book(id):
+
+    book = Book.query.get_or_404(id)
+
+    if request.method == "POST":
+
+        book.isbn = request.form.get(
+            "isbn"
+        )
+
+        book.title = request.form[
+            "title"
+        ]
+
+        book.author = request.form.get(
+            "author"
+        )
+
+        book.publisher = request.form.get(
+            "publisher"
+        )
+
+        year = request.form.get(
+            "publish_year"
+        )
+
+        if year:
+            book.publish_year = int(year)
+
+        quantity = int(
+            request.form["quantity"]
+        )
+
+        book.quantity = quantity
+        book.available_copies = quantity
+
+        category_id = request.form.get(
+            "category_id"
+        )
+
+        if category_id:
+            book.category_id = int(
+                category_id
+            )
+
+        db.session.commit()
+
+        flash("Book updated")
+
+        return redirect(
+            url_for("books")
+        )
+
+    categories = Category.query.all()
+
+    return render_template(
+        "update_book.html",
+        book=book,
+        categories=categories
+    )
+
+# ==================================================
+# DELETE BOOK
+# ==================================================
+
+@app.route(
+    "/books/delete/<int:id>"
+)
 @login_required
 def delete_book(id):
 
     book = Book.query.get_or_404(id)
 
     db.session.delete(book)
-
     db.session.commit()
 
-    flash('Đã xóa sách')
+    flash("Book deleted")
 
     return redirect(
-        url_for('books')
+        url_for("books")
     )
-
-
-# ==========================================
+    # ==================================================
 # BORROW MANAGEMENT
-# ==========================================
+# ==================================================
 
-@app.route('/borrow')
+@app.route("/borrow")
 @login_required
 def borrow():
 
     records = BorrowRecord.query.filter_by(
-        return_date=None
+        status="Borrowing"
     ).all()
 
     users = User.query.filter_by(
-        role='reader'
+        role="reader"
     ).all()
 
     books = Book.query.filter(
-        Book.quantity > 0
+        Book.available_copies > 0
     ).all()
 
     return render_template(
-        'borrow.html',
+        "borrow.html",
         records=records,
         users=users,
         books=books,
@@ -278,147 +653,364 @@ def borrow():
     )
 
 
-@app.route('/borrow/add', methods=['POST'])
+# --------------------------------------------------
+
+@app.route(
+    "/borrow/add",
+    methods=["POST"]
+)
 @login_required
 def add_borrow():
 
     user_id = int(
-        request.form['user_id']
+        request.form["user_id"]
     )
 
     book_id = int(
-        request.form['book_id']
+        request.form["book_id"]
     )
 
-    record = BorrowRecord(
-        user_id=user_id,
-        book_id=book_id,
-        borrow_date=date.today(),
-        due_date=date.today() + timedelta(days=14)
+    book = Book.query.get_or_404(
+        book_id
     )
 
-    book = Book.query.get(book_id)
+    if book.available_copies <= 0:
 
-    if book.quantity <= 0:
-
-        flash('Sách đã hết')
-
-        return redirect(
-            url_for('borrow')
+        flash(
+            "Book unavailable"
         )
 
-    book.quantity -= 1
+        return redirect(
+            url_for("borrow")
+        )
 
-    db.session.add(record)
+    record = BorrowRecord(
+
+        user_id=user_id,
+
+        book_id=book_id,
+
+        borrow_date=date.today(),
+
+        due_date=
+        date.today()
+        + timedelta(days=14),
+
+        status="Borrowing"
+    )
+
+    book.quantity -= 1
+    book.available_copies -= 1
 
     notification = Notification(
+
         user_id=user_id,
-        message=f'Bạn đã mượn sách "{book.title}"'
+
+        message=
+        f'You borrowed "{book.title}"'
+    )
+
+    db.session.add(record)
+    db.session.add(notification)
+
+    db.session.commit()
+
+    flash(
+        "Borrow successfully"
+    )
+
+    return redirect(
+        url_for("borrow")
+    )
+
+
+# --------------------------------------------------
+
+@app.route(
+    "/borrow/return/<int:id>"
+)
+@login_required
+def return_book(id):
+
+    record = BorrowRecord.query.get_or_404(
+        id
+    )
+
+    record.return_date = date.today()
+
+    record.status = "Returned"
+
+    record.book.quantity += 1
+    record.book.available_copies += 1
+
+    fine = record.calculate_fine()
+
+    record.fine_amount = fine
+
+    notification = Notification(
+
+        user_id=record.user_id,
+
+        message=
+        f'You returned "{record.book.title}"'
     )
 
     db.session.add(notification)
 
     db.session.commit()
 
-    flash('Cho mượn thành công')
+    flash(
+        "Return successfully"
+    )
 
     return redirect(
-        url_for('borrow')
+        url_for("borrow")
     )
 
 
-@app.route('/borrow/return/<int:id>')
+# --------------------------------------------------
+
+@app.route(
+    "/borrow/fine/<int:id>"
+)
 @login_required
-def return_book(id):
+def fine(id):
 
-    record = BorrowRecord.query.get_or_404(id)
+    record = BorrowRecord.query.get_or_404(
+        id
+    )
 
-    record.return_date = date.today()
+    amount = record.calculate_fine()
 
-    record.book.quantity += 1
+    record.fine_amount = amount
 
     db.session.commit()
 
-    flash('Trả sách thành công')
-
-    return redirect(
-        url_for('borrow')
+    return render_template(
+        "fine.html",
+        record=record
     )
 
 
-# ==========================================
-# NOTIFICATION
-# ==========================================
+# ==================================================
+# NOTIFICATION MANAGEMENT
+# ==================================================
 
-@app.route('/notifications')
+@app.route("/notifications")
 @login_required
 def notifications():
 
-    data = Notification.query.order_by(
+    data = Notification.query.filter_by(
+        user_id=current_user.id
+    ).order_by(
         Notification.created_at.desc()
     ).all()
 
     return render_template(
-        'notifications.html',
+        "notifications.html",
         notifications=data
     )
 
 
-# ==========================================
-# DATABASE INIT
-# ==========================================
+# --------------------------------------------------
+
+@app.route(
+    "/notifications/read/<int:id>"
+)
+@login_required
+def mark_notification(id):
+
+    notification = Notification.query.get_or_404(
+        id
+    )
+
+    notification.is_read = True
+
+    db.session.commit()
+
+    flash(
+        "Notification marked as read"
+    )
+
+    return redirect(
+        url_for("notifications")
+    )
+
+
+# ==================================================
+# REPORT MANAGEMENT
+# ==================================================
+
+@app.route("/reports")
+@login_required
+def reports():
+
+    if current_user.role not in [
+        "admin",
+        "librarian"
+    ]:
+
+        flash(
+            "Access denied"
+        )
+
+        return redirect(
+            url_for("dashboard")
+        )
+
+    report = {
+
+        "books":
+        Book.query.count(),
+
+        "users":
+        User.query.count(),
+
+        "categories":
+        Category.query.count(),
+
+        "borrow":
+        BorrowRecord.query.count(),
+
+        "returned":
+        BorrowRecord.query.filter_by(
+            status="Returned"
+        ).count(),
+
+        "overdue":
+        BorrowRecord.query.filter(
+            BorrowRecord.status == "Borrowing",
+            BorrowRecord.due_date < date.today()
+        ).count()
+    }
+
+    return render_template(
+        "reports.html",
+        report=report
+    )
+
+
+# ==================================================
+# CREATE DEFAULT DATA
+# ==================================================
 
 def create_default_data():
 
-    if not User.query.filter_by(
-        username='admin'
-    ).first():
+    admin = User.query.filter_by(
+        username="admin"
+    ).first()
+
+    if not admin:
 
         admin = User(
-            full_name='Administrator',
-            username='admin',
-            email='admin@gmail.com',
-            phone='0123456789',
-            address='Library Office',
-            password=generate_password_hash(
-                'admin123'
+            full_name="Administrator",
+            username="admin",
+            email="admin@gmail.com",
+            phone="0123456789",
+            address="Library Office",
+            password=
+            generate_password_hash(
+                "admin123"
             ),
-            role='admin'
-        )
-
-        reader = User(
-            full_name='Reader One',
-            username='reader1',
-            email='reader1@gmail.com',
-            phone='0988888888',
-            address='Student Dormitory',
-            password=generate_password_hash(
-                'reader123'
-            ),
-            role='reader'
+            role="admin"
         )
 
         db.session.add(admin)
+
+    librarian = User.query.filter_by(
+        username="librarian"
+    ).first()
+
+    if not librarian:
+
+        librarian = User(
+            full_name="Library Staff",
+            username="librarian",
+            email="staff@gmail.com",
+            phone="0111111111",
+            address="Library",
+            password=
+            generate_password_hash(
+                "staff123"
+            ),
+            role="librarian"
+        )
+
+        db.session.add(
+            librarian
+        )
+
+        db.session.flush()
+
+        staff = LibrarianStaff(
+            user_id=librarian.id,
+            employee_code="LIB001"
+        )
+
+        db.session.add(staff)
+
+    reader = User.query.filter_by(
+        username="reader"
+    ).first()
+
+    if not reader:
+
+        reader = User(
+            full_name="Student Reader",
+            username="reader",
+            email="reader@gmail.com",
+            phone="0999999999",
+            address="Student Dormitory",
+            password=
+            generate_password_hash(
+                "reader123"
+            ),
+            role="reader"
+        )
+
         db.session.add(reader)
 
     if Category.query.count() == 0:
 
         categories = [
-            Category(name='Programming'),
-            Category(name='Database'),
-            Category(name='Networking'),
-            Category(name='Software Engineering')
+
+            Category(
+                name="Programming",
+                description=
+                "Programming books"
+            ),
+
+            Category(
+                name="Database",
+                description=
+                "Database books"
+            ),
+
+            Category(
+                name="Software Engineering",
+                description=
+                "Software engineering books"
+            ),
+
+            Category(
+                name="Networking",
+                description=
+                "Networking books"
+            )
         ]
 
-        db.session.add_all(categories)
+        db.session.add_all(
+            categories
+        )
 
     db.session.commit()
 
-# ==========================================
-# RUN
-# ==========================================
 
-if __name__ == '__main__':
+# ==================================================
+# RUN APPLICATION
+# ==================================================
+
+if __name__ == "__main__":
 
     with app.app_context():
 

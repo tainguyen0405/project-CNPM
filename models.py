@@ -4,14 +4,18 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
-# ==========================================
+
+# =================================================
 # USER
-# ==========================================
+# =================================================
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
 
     full_name = db.Column(
         db.String(150),
@@ -43,7 +47,7 @@ class User(UserMixin, db.Model):
     )
 
     role = db.Column(
-        db.String(20),
+        db.String(30),
         default="reader"
     )
 
@@ -52,13 +56,51 @@ class User(UserMixin, db.Model):
         default=datetime.utcnow
     )
 
+    # -----------------------------
+    # Update Profile
+    # -----------------------------
+    def update_profile(
+        self,
+        full_name,
+        email,
+        phone,
+        address
+    ):
+        self.full_name = full_name
+        self.email = email
+        self.phone = phone
+        self.address = address
 
-# ==========================================
+    # -----------------------------
+    # Change Password
+    # -----------------------------
+    def change_password(
+        self,
+        new_password
+    ):
+        self.password = new_password
+
+    # -----------------------------
+    # User Information
+    # -----------------------------
+    def get_user_info(self):
+        return {
+            "id": self.id,
+            "full_name": self.full_name,
+            "username": self.username,
+            "email": self.email,
+            "phone": self.phone,
+            "address": self.address,
+            "role": self.role,
+            "created_at": self.created_at
+        }
+
+
+# =================================================
 # LIBRARIAN STAFF
-# ==========================================
+# =================================================
 
 class LibrarianStaff(db.Model):
-
     __tablename__ = "librarian_staff"
 
     id = db.Column(
@@ -78,16 +120,18 @@ class LibrarianStaff(db.Model):
 
     user = db.relationship(
         "User",
-        backref="staff_profile"
+        backref=db.backref(
+            "staff_profile",
+            uselist=False
+        )
     )
 
 
-# ==========================================
+# =================================================
 # CATEGORY
-# ==========================================
+# =================================================
 
 class Category(db.Model):
-
     __tablename__ = "categories"
 
     id = db.Column(
@@ -104,13 +148,19 @@ class Category(db.Model):
         db.Text
     )
 
+    def get_category_details(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description
+        }
 
-# ==========================================
+
+# =================================================
 # BOOK
-# ==========================================
+# =================================================
 
 class Book(db.Model):
-
     __tablename__ = "books"
 
     id = db.Column(
@@ -164,22 +214,33 @@ class Book(db.Model):
         "Category",
         backref="books"
     )
-    def get_book_details(self):
 
+    # -----------------------------
+    # Book Details
+    # -----------------------------
+    def get_book_details(self):
         return {
+            "id": self.id,
+            "isbn": self.isbn,
             "title": self.title,
             "author": self.author,
-            "isbn": self.isbn,
-            "publisher": self.publisher
+            "publisher": self.publisher,
+            "publish_year": self.publish_year,
+            "quantity": self.quantity,
+            "available_copies": self.available_copies,
+            "category":
+                self.category.name
+                if self.category
+                else None,
+            "created_at": self.created_at
         }
 
 
-# ==========================================
+# =================================================
 # BORROW RECORD
-# ==========================================
+# =================================================
 
 class BorrowRecord(db.Model):
-
     __tablename__ = "borrow_records"
 
     id = db.Column(
@@ -222,33 +283,71 @@ class BorrowRecord(db.Model):
 
     user = db.relationship(
         "User",
-        backref="borrows"
+        backref="borrow_records"
     )
 
     book = db.relationship(
         "Book",
-        backref="borrows"
+        backref="borrow_records"
     )
+
+    # -----------------------------
+    # Calculate Fine
+    # -----------------------------
     def calculate_fine(self):
 
-        if self.return_date and self.return_date > self.due_date:
+        if (
+            self.return_date
+            and self.due_date
+            and self.return_date > self.due_date
+        ):
 
             days = (
                 self.return_date -
                 self.due_date
             ).days
 
-            return days * 5000
+            self.fine_amount = (
+                days * 5000
+            )
 
+            return self.fine_amount
+
+        self.fine_amount = 0
         return 0
 
+    # -----------------------------
+    # Return Book
+    # -----------------------------
+    def update_return(self):
 
-# ==========================================
+        self.return_date = (
+            datetime.today().date()
+        )
+
+        self.status = "Returned"
+
+        self.calculate_fine()
+
+    # -----------------------------
+    # Borrow History
+    # -----------------------------
+    @staticmethod
+    def get_user_borrow_history(
+        user_id
+    ):
+        return BorrowRecord.query.filter_by(
+            user_id=user_id
+        ).order_by(
+            BorrowRecord.borrow_date.desc()
+        ).all()
+
+
+# =================================================
 # NOTIFICATION
-# ==========================================
+# =================================================
 
 class Notification(db.Model):
-
     __tablename__ = "notifications"
 
     id = db.Column(
@@ -280,10 +379,26 @@ class Notification(db.Model):
         default=datetime.utcnow
     )
 
-    user = db.relationship( 
+    user = db.relationship(
         "User",
         backref="notifications"
     )
-    def mark_as_read(self):
 
+    # -----------------------------
+    # Mark Notification
+    # -----------------------------
+    def mark_as_read(self):
         self.is_read = True
+
+    # -----------------------------
+    # User Notifications
+    # -----------------------------
+    @staticmethod
+    def get_user_notifications(
+        user_id
+    ):
+        return Notification.query.filter_by(
+            user_id=user_id
+        ).order_by(
+            Notification.created_at.desc()
+        ).all()

@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+
+
+<h2 class="text-3xl font-bold text-[#1E3A5F] mb-8">
+
+📊 Library Reports
+
+</h2>
+
+
+
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+
+
+<!-- Books -->
+
+<div class="glass p-6 rounded-3xl shadow">
+
+
+<h3 class="text-gray-500">
+
+Total Books
+
+</h3>
+
+
+<p class="text-4xl font-bold text-[#1E3A5F] mt-3">
+
+{{ report.books }}
+
+</p>
+
+
+</div>
+
+
+
+
+
+<!-- Users -->
+
+
+<div class="glass p-6 rounded-3xl shadow">
+
+
+<h3 class="text-gray-500">
+
+Total Users
+
+</h3>
+
+
+<p class="text-4xl font-bold text-[#1E3A5F] mt-3">
+
+{{ report.users }}
+
+</p>
+
+
+</div>
+
+
+
+
+
+<!-- Categories -->
+
+
+<div class="glass p-6 rounded-3xl shadow">
+
+
+<h3 class="text-gray-500">
+
+Categories
+
+</h3>
+
+
+<p class="text-4xl font-bold text-[#1E3A5F] mt-3">
+
+{{ report.categories }}
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+
+
+<!-- Borrow -->
+
+
+<div class="glass p-6 rounded-3xl shadow">
+
+
+<h3 class="text-gray-500">
+
+Borrow Records
+
+</h3>
+
+
+<p class="text-4xl font-bold text-green-600 mt-3">
+
+{{ report.borrow }}
+
+</p>
+
+
+</div>
+
+
+
+
+
+<!-- Returned -->
+
+
+<div class="glass p-6 rounded-3xl shadow">
+
+
+<h3 class="text-gray-500">
+
+Returned Books
+
+</h3>
+
+
+<p class="text-4xl font-bold text-blue-600 mt-3">
+
+{{ report.returned }}
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+<!-- Overdue -->
+
+
+<div class="glass p-6 rounded-3xl shadow">
+
+
+<h3 class="text-gray-500">
+
+Overdue Books
+
+</h3>
+
+
+<p class="text-4xl font-bold text-red-500 mt-3">
+
+{{ report.overdue }}
+
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="glass mt-8 p-6 rounded-3xl">
+
+
+<h3 class="text-xl font-bold mb-4">
+
+Report Summary
+
+</h3>
+
+
+
+<table class="w-full">
+
+
+<tr class="border-b">
+
+<td class="p-3">
+
+Total books in library
+
+</td>
+
+
+<td class="p-3 font-bold">
+
+{{ report.books }}
+
+</td>
+
+
+</tr>
+
+
+
+
+<tr class="border-b">
+
+
+<td class="p-3">
+
+Registered users
+
+</td>
+
+
+<td class="p-3 font-bold">
+
+{{ report.users }}
+
+</td>
+
+
+</tr>
+
+
+
+
+<tr class="border-b">
+
+
+<td class="p-3">
+
+Borrow activities
+
+</td>
+
+
+<td class="p-3 font-bold">
+
+{{ report.borrow }}
+
+</td>
+
+
+</tr>
+
+
+
+
+
+<tr>
+
+
+<td class="p-3">
+
+Overdue books
+
+</td>
+
+
+<td class="p-3 font-bold text-red-500">
+
+{{ report.overdue }}
+
+</td>
+
+
+</tr>
+
+
+
+</table>
+
+
+
+</div>
+
+
+
+
+
+
+<script>
+
+
+gsap.from(
+".glass",
+{
+y:40,
+opacity:0,
+duration:0.8,
+stagger:0.2
+}
+)
+
+
+</script>
+
+
+
+{% endblock %}

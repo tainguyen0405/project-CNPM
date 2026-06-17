@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold text-[#1E3A5F] mb-8">
+✏️ Update Book
+</h2>
+
+<div
+id="update-card"
+class="glass bg-white rounded-3xl p-8 shadow-lg max-w-3xl">
+
+<form
+method="POST"
+class="space-y-5">
+
+<input
+type="text"
+name="title"
+value="{{ book.title }}"
+placeholder="Book Title"
+required
+class="w-full border p-3 rounded-xl">
+
+<input
+type="text"
+name="author"
+value="{{ book.author }}"
+placeholder="Author"
+class="w-full border p-3 rounded-xl">
+
+<input
+type="text"
+name="publisher"
+value="{{ book.publisher }}"
+placeholder="Publisher"
+class="w-full border p-3 rounded-xl">
+
+<input
+type="number"
+name="publish_year"
+value="{{ book.publish_year }}"
+placeholder="Publish Year"
+class="w-full border p-3 rounded-xl">
+
+<input
+type="number"
+name="quantity"
+value="{{ book.quantity }}"
+placeholder="Quantity"
+required
+class="w-full border p-3 rounded-xl">
+
+<button
+type="submit"
+class="
+bg-[#1E3A5F]
+text-white
+px-6
+py-3
+rounded-xl">
+
+Update Book
+
+</button>
+
+</form>
+
+</div>
+
+<script>
+
+gsap.from(
+"#update-card",
+{
+y:40,
+opacity:0,
+duration:1
+}
+)
+
+</script>
+
+{% endblock %}
