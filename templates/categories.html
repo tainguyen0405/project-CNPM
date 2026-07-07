@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold mb-6">
+
+    
+📂 Categories
+</h2>
+
+<form
+method="POST"
+action="/categories/add"
+class="flex gap-3 mb-6">
+
+<input
+name="name"
+required
+placeholder="Category Name"
+class="border rounded-xl px-4 py-2">
+
+<button
+class="bg-[#1E3A5F] text-white px-5 rounded-xl">
+
+Add
+
+</button>
+
+</form>
+
+<div class="glass rounded-2xl overflow-hidden">
+
+<table class="w-full">
+
+{% for c in categories %}
+
+<tr class="border-b">
+
+<td class="p-4">
+{{ c.name }}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+{% endblock %}

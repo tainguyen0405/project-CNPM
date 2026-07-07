@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>LibraryMS</title>
+
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+
+
+<style>
+
+body{
+
+background:#f4f7fb;
+
+overflow-x:hidden;
+
+}
+
+
+.glass{
+
+background:rgba(255,255,255,.8);
+
+backdrop-filter:blur(12px);
+
+}
+
+
+</style>
+
+
+</head>
+
+
+
+<body class="flex min-h-screen">
+
+
+
+<!-- SIDEBAR -->
+
+
+<aside
+
+id="sidebar"
+
+class="
+w-64
+bg-[#1E3A5F]
+text-white
+flex
+flex-col
+p-6
+shadow-2xl
+">
+
+
+
+<h1 class="text-2xl font-bold mb-10">
+
+📚 LibraryMS
+
+</h1>
+
+
+
+
+
+<nav class="flex flex-col gap-3">
+
+
+
+<a href="/dashboard"
+
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+
+🏠 Dashboard
+
+</a>
+
+
+
+
+
+<a href="/books"
+
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+
+📖 Books
+
+</a>
+
+
+
+
+
+<a href="/borrow"
+
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+
+🔄 Borrow & Return
+
+</a>
+
+
+
+
+
+<a href="/categories"
+
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+
+📂 Categories
+
+</a>
+
+
+
+
+
+<a href="/notifications"
+
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+
+🔔 Notifications
+
+</a>
+
+
+
+
+
+<!-- ADMIN MENU -->
+
+
+{% if current_user.role == "admin" %}
+
+
+<hr class="my-3 border-white/20">
+
+
+
+<p class="text-xs text-white/50">
+
+ADMIN
+
+</p>
+
+
+
+
+<a href="/users"
+
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+
+👥 Manage Users
+
+</a>
+
+
+
+{% endif %}
+
+
+
+
+
+
+<!-- ADMIN + LIBRARIAN -->
+
+
+{% if current_user.role in ["admin","librarian"] %}
+
+
+
+<hr class="my-3 border-white/20">
+
+
+<p class="text-xs text-white/50">
+
+MANAGEMENT
+
+</p>
+
+
+
+<a href="/reports"
+
+class="px-4 py-3 rounded-xl hover:bg-white/10">
+
+📊 Reports
+
+</a>
+
+
+
+{% endif %}
+
+
+
+
+
+</nav>
+
+
+
+
+
+
+<div class="mt-auto">
+
+
+
+<hr class="my-5 border-white/20">
+
+
+
+
+
+<p class="text-sm text-white/70">
+
+{{ current_user.username }}
+
+</p>
+
+
+
+<p class="text-xs text-white/50">
+
+{{ current_user.role }}
+
+</p>
+
+
+
+
+
+
+<a
+
+href="/profile"
+
+class="
+block
+mt-4
+bg-white/20
+text-center
+py-2
+rounded-xl
+hover:bg-white/30
+">
+
+👤 Profile
+
+</a>
+
+
+
+
+
+<a
+
+href="/change-password"
+
+class="
+block
+mt-2
+bg-blue-500
+text-center
+py-2
+rounded-xl
+hover:bg-blue-600
+">
+
+🔑 Change Password
+
+</a>
+
+
+
+
+
+
+<a
+
+href="/logout"
+
+class="
+block
+mt-2
+bg-red-500
+text-center
+py-2
+rounded-xl
+">
+
+Logout
+
+</a>
+
+
+
+
+</div>
+
+
+
+
+</aside>
+
+
+
+
+
+
+<!-- MAIN -->
+
+<main
+
+id="main-content"
+
+class="flex-1 p-8">
+
+
+
+
+
+{% with messages = get_flashed_messages() %}
+
+
+{% if messages %}
+
+
+
+<div
+
+id="flash"
+
+class="
+bg-green-100
+text-green-800
+px-5
+py-3
+rounded-xl
+mb-5
+">
+
+
+{{ messages[0] }}
+
+
+</div>
+
+
+
+{% endif %}
+
+
+{% endwith %}
+
+
+
+
+
+
+{% block content %}
+
+
+{% endblock %}
+
+
+
+
+
+</main>
+
+
+
+
+
+
+<script>
+
+
+gsap.from(
+
+"#sidebar",
+
+{
+
+x:-120,
+
+opacity:0,
+
+duration:1
+
+}
+
+)
+
+
+
+
+gsap.from(
+
+"#main-content",
+
+{
+
+y:30,
+
+opacity:0,
+
+duration:1
+
+}
+
+)
+
+
+
+</script>
+
+
+
+
+</body>
+
+</html>

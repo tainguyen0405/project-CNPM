@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold text-[#1E3A5F] mb-8">
+    💰 Fine Information
+</h2>
+
+<div
+    id="fine-card"
+    class="glass bg-white rounded-3xl p-8 shadow-lg max-w-4xl">
+
+    <div class="grid grid-cols-2 gap-6">
+
+        <div>
+            <p class="text-gray-500 mb-1">
+                Reader
+            </p>
+
+            <p class="font-semibold text-lg">
+                {{ record.user.full_name }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-gray-500 mb-1">
+                Username
+            </p>
+
+            <p class="font-semibold text-lg">
+                {{ record.user.username }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-gray-500 mb-1">
+                Book
+            </p>
+
+            <p class="font-semibold text-lg">
+                {{ record.book.title }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-gray-500 mb-1">
+                Status
+            </p>
+
+            {% if record.status == "Returned" %}
+            <span
+                class="bg-green-100 text-green-700 px-3 py-1 rounded-full">
+
+                Returned
+
+            </span>
+            {% else %}
+            <span
+                class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">
+
+                Borrowing
+
+            </span>
+            {% endif %}
+        </div>
+
+        <div>
+            <p class="text-gray-500 mb-1">
+                Borrow Date
+            </p>
+
+            <p>
+                {{ record.borrow_date }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-gray-500 mb-1">
+                Due Date
+            </p>
+
+            <p>
+                {{ record.due_date }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-gray-500 mb-1">
+                Return Date
+            </p>
+
+            <p>
+                {{ record.return_date if record.return_date else "Not returned" }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-gray-500 mb-1">
+                Overdue Days
+            </p>
+
+            {% if record.fine_amount > 0 %}
+            <p class="font-semibold text-red-500">
+
+                {{
+                ((record.return_date or today)
+                - record.due_date).days
+                }}
+
+                day(s)
+
+            </p>
+            {% else %}
+            <p>
+                0 day
+            </p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <hr class="my-8">
+
+    <div class="text-center">
+
+        {% if record.fine_amount > 0 %}
+
+        <p class="text-gray-500 mb-2">
+            Total Fine
+        </p>
+
+        <p class="text-4xl font-bold text-red-500">
+
+            {{ "{:,.0f}".format(record.fine_amount) }}
+            VND
+
+        </p>
+
+        {% else %}
+
+        <p class="text-3xl font-bold text-green-500">
+            No Fine
+        </p>
+
+        {% endif %}
+
+    </div>
+
+    <div class="flex justify-center gap-4 mt-10">
+
+        <a
+            href="/borrow"
+            class="
+            bg-[#1E3A5F]
+            text-white
+            px-6
+            py-3
+            rounded-xl
+            hover:scale-105
+            transition">
+
+            ← Back
+
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+
+gsap.from(
+    "#fine-card",
+    {
+        y:40,
+        opacity:0,
+        duration:1
+    }
+)
+
+</script>
+
+{% endblock %}

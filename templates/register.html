@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Create Account</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+
+body{
+background:#F4F7FB;
+}
+
+.glass{
+background:white;
+box-shadow:0 15px 40px rgba(0,0,0,.08);
+}
+
+</style>
+
+</head>
+
+<body class="min-h-screen flex items-center justify-center">
+
+<div class="glass p-8 rounded-3xl shadow-lg w-full max-w-md">
+
+<div class="min-h-screen flex items-center justify-center">
+
+
+<div class="glass p-8 rounded-3xl shadow-lg w-full max-w-md">
+
+
+<h2 class="text-3xl font-bold text-[#1E3A5F] mb-6 text-center">
+
+📝 Create Account
+
+</h2>
+
+<form method="POST"
+      action="/register"
+      class="space-y-4">
+
+
+<!-- Full Name -->
+
+<div>
+
+<label class="font-semibold">
+Full Name
+</label>
+
+<input
+
+type="text"
+
+name="full_name"
+
+required
+
+placeholder="Enter full name"
+
+class="w-full border rounded-xl px-4 py-3 mt-1"
+
+>
+
+</div>
+
+
+
+<!-- Username -->
+
+<div>
+
+<label class="font-semibold">
+Username
+</label>
+
+<input
+
+type="text"
+
+name="username"
+
+required
+
+placeholder="Enter username"
+
+class="w-full border rounded-xl px-4 py-3 mt-1"
+
+>
+
+</div>
+
+
+
+<!-- Email -->
+
+<div>
+
+<label class="font-semibold">
+Email
+</label>
+
+
+<input
+
+type="email"
+
+name="email"
+
+required
+
+placeholder="example@gmail.com"
+
+class="w-full border rounded-xl px-4 py-3 mt-1"
+
+>
+
+</div>
+
+
+
+<!-- Phone -->
+
+<div>
+
+<label class="font-semibold">
+Phone
+</label>
+
+
+<input
+
+type="text"
+
+name="phone"
+
+placeholder="Phone number"
+
+class="w-full border rounded-xl px-4 py-3 mt-1"
+
+>
+
+</div>
+
+
+
+
+<!-- Address -->
+
+<div>
+
+<label class="font-semibold">
+Address
+</label>
+
+
+<input
+
+type="text"
+
+name="address"
+
+placeholder="Address"
+
+class="w-full border rounded-xl px-4 py-3 mt-1"
+
+>
+
+</div>
+
+
+
+
+<!-- Password -->
+
+<div>
+
+<label class="font-semibold">
+Password
+</label>
+
+
+<input
+
+type="password"
+
+name="password"
+
+required
+
+placeholder="Password"
+
+class="w-full border rounded-xl px-4 py-3 mt-1"
+
+>
+
+</div>
+
+
+
+
+<button
+
+type="submit"
+
+class="
+w-full
+bg-[#1E3A5F]
+text-white
+py-3
+rounded-xl
+font-semibold
+hover:opacity-90
+">
+
+
+Register
+
+
+</button>
+
+
+
+</form>
+
+
+
+<div class="text-center mt-5">
+
+
+<p>
+
+Already have account?
+
+
+<a
+
+href="/login"
+
+class="text-blue-600 font-semibold">
+
+Login
+
+</a>
+
+
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+</div>
+
+<script>
+
+gsap.from(
+".glass",
+{
+y:40,
+opacity:0,
+duration:0.8
+}
+)
+
+</script>
+
+</body>
+
+</html>
