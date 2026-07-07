@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="flex justify-between items-center mb-8">
+
+    <h2 class="text-3xl font-bold text-[#1E3A5F]">
+        📖 Book Management
+    </h2>
+
+    <button
+        onclick="openModal()"
+        class="bg-[#1E3A5F] text-white px-5 py-3 rounded-xl hover:scale-105 transition">
+
+        + Add Book
+
+    </button>
+
+</div>
+
+
+<!-- SEARCH -->
+
+<form method="GET" class="mb-6 flex gap-3">
+
+    <input
+        type="text"
+        name="q"
+        value="{{ query }}"
+        placeholder="Search title..."
+        class="border rounded-xl px-4 py-3 w-96">
+
+    <button
+        class="bg-gray-100 px-5 rounded-xl">
+
+        🔍 Search
+
+    </button>
+
+</form>
+
+<!-- BOOK TABLE -->
+
+<div
+    id="book-table"
+    class="glass rounded-3xl overflow-hidden shadow-lg">
+
+    <table class="w-full">
+
+        <thead class="bg-[#1E3A5F] text-white">
+
+            <tr>
+
+                <th class="p-4">ISBN</th>
+                <th class="p-4">Title</th>
+                <th class="p-4">Author</th>
+                <th class="p-4">Category</th>
+                <th class="p-4">Available</th>
+                <th class="p-4">Action</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for book in books %}
+
+            <tr class="border-b hover:bg-gray-50">
+
+                <td class="p-4">
+                    {{ book.isbn or '-' }}
+                </td>
+
+                <td class="p-4 font-semibold">
+                    {{ book.title }}
+                </td>
+
+                <td class="p-4">
+                    {{ book.author }}
+                </td>
+
+                <td class="p-4">
+
+                    {% if book.category %}
+
+                    <span
+                        class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs">
+
+                        {{ book.category.name }}
+
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td class="p-4 text-center">
+
+                    {% if book.available_copies > 0 %}
+
+                    <span class="text-green-600 font-bold">
+
+                        {{ book.available_copies }}
+
+                    </span>
+
+                    {% else %}
+
+                    <span class="text-red-600 font-bold">
+
+                        Out
+
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td class="p-4">
+
+                    <div
+                        class="flex justify-center gap-4">
+
+                        <a
+                            href="{{ url_for('book_detail', id=book.id) }}"
+                            class="text-blue-600 hover:text-blue-800">
+
+                            👁 Detail
+
+                        </a>
+
+                        <a
+                            href="{{ url_for('update_book', id=book.id) }}"
+                            class="text-yellow-600 hover:text-yellow-800">
+
+                            ✏ Update
+
+                        </a>
+
+                        <a
+                            href="{{ url_for('delete_book', id=book.id) }}"
+                            onclick="return confirm('Delete this book?')"
+                            class="text-red-600 hover:text-red-800">
+
+                            🗑 Delete
+
+                        </a>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- ADD BOOK MODAL -->
+
+<div
+    id="modal"
+    class="hidden fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+
+    <div
+        id="modal-box"
+        class="bg-white p-8 rounded-3xl w-[550px]">
+
+        <h3 class="text-2xl font-bold mb-6">
+
+            Add New Book
+
+        </h3>
+
+        <form
+            method="POST"
+            action="{{ url_for('add_book') }}">
+
+            <input
+                name="isbn"
+                placeholder="ISBN"
+                class="w-full border rounded-xl px-4 py-3 mb-4">
+
+
+            <input
+                name="title"
+                required
+                placeholder="Book Title"
+                class="w-full border rounded-xl px-4 py-3 mb-4">
+
+
+            <input
+                name="author"
+                required
+                placeholder="Author"
+                class="w-full border rounded-xl px-4 py-3 mb-4">
+
+
+            <input
+                name="publisher"
+                placeholder="Publisher"
+                class="w-full border rounded-xl px-4 py-3 mb-4">
+
+
+            <input
+                type="number"
+                name="publish_year"
+                placeholder="Publish Year"
+                class="w-full border rounded-xl px-4 py-3 mb-4">
+
+
+            <select
+                name="category_id"
+                required
+                class="w-full border rounded-xl px-4 py-3 mb-4">
+
+                {% for c in categories %}
+
+                <option value="{{ c.id }}">
+
+                    {{ c.name }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <input
+                type="number"
+                name="quantity"
+                value="1"
+                min="1"
+                class="w-full border rounded-xl px-4 py-3 mb-5">
+
+
+            <div class="flex gap-3">
+
+                <button
+                    class="flex-1 bg-[#1E3A5F] text-white py-3 rounded-xl">
+
+                    Add Book
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="closeModal()"
+                    class="flex-1 bg-gray-200 py-3 rounded-xl">
+
+                    Cancel
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+gsap.from(
+"#book-table",
+{
+    y:30,
+    opacity:0,
+    duration:1
+}
+);
+
+function openModal(){
+
+    document
+    .getElementById("modal")
+    .classList
+    .remove("hidden");
+
+    gsap.from(
+    "#modal-box",
+    {
+        scale:.8,
+        opacity:0,
+        duration:.4
+    });
+
+}
+
+function closeModal(){
+
+    document
+    .getElementById("modal")
+    .classList
+    .add("hidden");
+
+}
+
+</script>
+
+{% endblock %}
