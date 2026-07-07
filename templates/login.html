@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LibraryMS - Login</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+</head>
+
+<body class="bg-[#F4F7FB] min-h-screen flex items-center justify-center">
+
+<div
+id="card"
+class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md">
+
+    <div class="text-center mb-8">
+
+        <h1 class="text-4xl font-bold text-[#1E3A5F]">
+
+            📚 LibraryMS
+
+        </h1>
+
+        <p class="text-gray-500 mt-2">
+
+            Library Management System
+
+        </p>
+
+    </div>
+
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+
+    <div
+    class="bg-red-100 text-red-700 rounded-xl p-3 mb-5">
+
+        {{ messages[0] }}
+
+    </div>
+
+    {% endif %}
+    {% endwith %}
+
+
+    <form method="POST">
+
+        <div class="mb-5">
+
+            <label class="block text-sm font-semibold mb-2">
+
+                Username
+
+            </label>
+
+            <input
+                type="text"
+                name="username"
+                required
+                placeholder="Username"
+                class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1E3A5F]">
+
+        </div>
+
+
+        <div class="mb-6">
+
+            <label class="block text-sm font-semibold mb-2">
+
+                Password
+
+            </label>
+
+            <input
+                type="password"
+                name="password"
+                required
+                placeholder="Password"
+                class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1E3A5F]">
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="w-full bg-[#1E3A5F] text-white py-3 rounded-xl font-semibold hover:bg-[#17304D] transition">
+
+            Login
+
+        </button>
+
+    </form>
+
+
+    <div class="text-center mt-6">
+
+        <span class="text-gray-500">
+
+            Don't have an account?
+
+        </span>
+
+        <a
+            href="{{ url_for('register') }}"
+            class="text-[#1E3A5F] font-semibold hover:underline">
+
+            Register
+
+        </a>
+
+    </div>
+
+
+    <div class="mt-8 border-t pt-5 text-sm text-gray-500">
+
+        <p>
+
+            Demo Account
+
+        </p>
+
+        <p>
+
+            <b>Admin:</b> admin / admin123
+
+        </p>
+
+        <p>
+
+            <b>Librarian:</b> librarian / staff123
+
+        </p>
+
+        <p>
+
+            <b>Student:</b> student / student123
+
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+
+gsap.from(
+"#card",
+{
+y:50,
+opacity:0,
+duration:0.8
+}
+);
+
+</script>
+
+</body>
+
+</html>
