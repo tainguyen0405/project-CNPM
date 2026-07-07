@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold text-[#1E3A5F] mb-8">
+    
+🔄 Borrow & Return
+</h2>
+
+<!-- Borrow Form -->
+<div class="glass p-6 rounded-3xl mb-8 shadow-lg">
+
+    <h3 class="text-xl font-semibold mb-5">
+        Borrow Book
+    </h3>
+
+    <form
+        method="POST"
+        action="/borrow/add"
+        class="flex flex-wrap gap-4">
+
+        <!-- Reader -->
+        <select
+            name="user_id"
+            required
+            class="border rounded-xl px-4 py-3">
+
+            <option value="">
+                Select Reader
+            </option>
+
+            {% for u in users %}
+            <option value="{{ u.id }}">
+                {{ u.full_name }}
+                ({{ u.username }})
+            </option>
+            {% endfor %}
+
+        </select>
+
+        <!-- Book -->
+        <select
+            name="book_id"
+            required
+            class="border rounded-xl px-4 py-3">
+
+            <option value="">
+                Select Book
+            </option>
+
+            {% for b in books %}
+            <option value="{{ b.id }}">
+                {{ b.title }}
+                ({{ b.available_copies }} available)
+            </option>
+            {% endfor %}
+
+        </select>
+
+        <!-- Button -->
+        <button
+            class="bg-[#1E3A5F] text-white px-6 py-3 rounded-xl hover:scale-105 transition">
+
+            Borrow
+
+        </button>
+
+    </form>
+
+</div>
+
+<!-- Borrow Records -->
+<div
+    id="borrow-table"
+    class="glass rounded-3xl overflow-hidden shadow-lg">
+
+    <table class="w-full">
+
+        <thead class="bg-[#1E3A5F] text-white">
+
+            <tr>
+
+                <th class="p-4">
+                    Reader
+                </th>
+
+                <th class="p-4">
+                    Book
+                </th>
+
+                <th class="p-4">
+                    Borrow Date
+                </th>
+
+                <th class="p-4">
+                    Due Date
+                </th>
+
+                <th class="p-4">
+                    Status
+                </th>
+
+                <th class="p-4">
+                    Action
+                </th>
+
+                <th class="p-4">
+                    Fine
+                </th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for r in records %}
+
+            <tr
+                class="
+                border-b
+                hover:bg-gray-50
+
+                {% if r.due_date < today %}
+                bg-red-50
+                {% endif %}
+                ">
+
+                <!-- Reader -->
+                <td class="p-4">
+                    {{ r.user.username }}
+                </td>
+
+                <!-- Book -->
+                <td class="p-4 font-semibold">
+                    {{ r.book.title }}
+                </td>
+
+                <!-- Borrow Date -->
+                <td class="p-4">
+                    {{ r.borrow_date }}
+                </td>
+
+                <!-- Due Date -->
+                <td class="p-4">
+
+                    {{ r.due_date }}
+
+                    {% if r.due_date < today %}
+
+                    <span
+                        class="ml-2 text-red-600 font-bold">
+
+                        ⚠ Overdue
+
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+                <!-- Status -->
+                <td class="p-4">
+
+                    {% if r.status == "Borrowing" %}
+
+                    <span
+                        class="bg-yellow-100
+                        text-yellow-700
+                        px-3 py-1
+                        rounded-full
+                        text-sm">
+
+                        Borrowing
+
+                    </span>
+
+                    {% else %}
+
+                    <span
+                        class="bg-green-100
+                        text-green-700
+                        px-3 py-1
+                        rounded-full
+                        text-sm">
+
+                        Returned
+
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+                <!-- Return -->
+                <td class="p-4">
+
+                    {% if r.status == "Borrowing" %}
+
+                    <a
+                        href="/borrow/return/{{ r.id }}"
+                        onclick="return confirm('Return this book?')"
+                        class="bg-green-100
+                        text-green-700
+                        px-4 py-2
+                        rounded-xl
+                        hover:bg-green-200">
+
+                        Return
+
+                    </a>
+
+                    {% else %}
+
+                    <span class="text-gray-400">
+                        Returned
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+                <!-- Fine -->
+                <td class="p-4">
+
+                    {% if r.due_date < today or r.fine_amount > 0 %}
+
+                    <a
+                        href="/borrow/fine/{{ r.id }}"
+                        class="bg-red-500
+                        text-white
+                        px-4 py-2
+                        rounded-xl
+                        hover:bg-red-600">
+
+                        View Fine
+
+                    </a>
+
+                    {% else %}
+
+                    <span class="text-gray-400">
+                        No Fine
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<script>
+
+gsap.from(
+    "#borrow-table",
+    {
+        y:40,
+        opacity:0,
+        duration:1
+    }
+);
+
+</script>
+
+{% endblock %}
