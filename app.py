@@ -177,26 +177,27 @@ def login():
 # REGISTER
 # ==================================================
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
 
     if request.method == "POST":
 
-        full_name = request.form["full_name"]
-        username = request.form["username"]
-        email = request.form["email"]
-        phone = request.form["phone"]
-        address = request.form["address"]
+        full_name = request.form["full_name"].strip()
+        username = request.form["username"].strip()
+        email = request.form["email"].strip()
+        phone = request.form["phone"].strip()
+        address = request.form["address"].strip()
         password = request.form["password"]
 
         # Kiểm tra username
         if User.query.filter_by(username=username).first():
-            flash("Username already exists.")
+            flash("Username already exists!")
             return redirect(url_for("register"))
 
         # Kiểm tra email
         if User.query.filter_by(email=email).first():
-            flash("Email already exists.")
+            flash("Email already exists!")
             return redirect(url_for("register"))
 
         new_user = User(
@@ -205,17 +206,33 @@ def register():
             email=email,
             phone=phone,
             address=address,
-            role="student"
+            password=generate_password_hash(password),
+            role="reader"
         )
 
-        new_user.set_password(password)
+        try:
+            db.session.add(new_user)
+            db.session.commit()
 
-        db.session.add(new_user)
-        db.session.commit()
+            flash("Register successfully!")
 
-        flash("Account created successfully. Please login.")
+            return redirect(url_for("login"))
 
-        return redirect(url_for("login"))
+        except Exception as e:
+
+            db.session.rollback()
+
+            print(e)
+
+            flash(str(e))
+
+            return redirect(url_for("register"))
+
+    return render_template("register.html")
+
+    flash("Account created successfully. Please login.")
+
+    return redirect(url_for("login"))
 
     return render_template("register.html")
 
